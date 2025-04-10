@@ -10,11 +10,11 @@ import { RootStackParamList } from '../types/navigation';
 import theme from '../styles/theme';
 import Header from '../components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+ 
 type PatientDashboardScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'PatientDashboard'>;
 };
-
+ 
 interface Appointment {
   id: string;
   patientId: string;
@@ -25,11 +25,11 @@ interface Appointment {
   specialty: string;
   status: 'pending' | 'confirmed' | 'cancelled';
 }
-
+ 
 interface StyledProps {
   status: string;
 }
-
+ 
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -40,7 +40,7 @@ const getStatusColor = (status: string) => {
       return theme.colors.warning;
   }
 };
-
+ 
 const getStatusText = (status: string) => {
   switch (status) {
     case 'confirmed':
@@ -51,13 +51,13 @@ const getStatusText = (status: string) => {
       return 'Pendente';
   }
 };
-
+ 
 const PatientDashboardScreen: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigation = useNavigation<PatientDashboardScreenProps['navigation']>();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-
+ 
   const loadAppointments = async () => {
     try {
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
@@ -74,34 +74,34 @@ const PatientDashboardScreen: React.FC = () => {
       setLoading(false);
     }
   };
-
+ 
   // Carrega as consultas quando a tela estiver em foco
   useFocusEffect(
     React.useCallback(() => {
       loadAppointments();
     }, [])
   );
-
+ 
   return (
     <Container>
       <Header />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Title>Minhas Consultas</Title>
-
+ 
         <Button
           title="Agendar Nova Consulta"
           onPress={() => navigation.navigate('CreateAppointment')}
           containerStyle={styles.button as ViewStyle}
           buttonStyle={styles.buttonStyle}
         />
-
+ 
         <Button
           title="Meu Perfil"
           onPress={() => navigation.navigate('Profile')}
           containerStyle={styles.button as ViewStyle}
           buttonStyle={styles.buttonStyle}
         />
-
+ 
         {loading ? (
           <LoadingText>Carregando consultas...</LoadingText>
         ) : appointments.length === 0 ? (
@@ -128,7 +128,7 @@ const PatientDashboardScreen: React.FC = () => {
             </AppointmentCard>
           ))
         )}
-
+ 
         <Button
           title="Sair"
           onPress={signOut}
@@ -139,7 +139,7 @@ const PatientDashboardScreen: React.FC = () => {
     </Container>
   );
 };
-
+ 
 const styles = {
   scrollContent: {
     padding: 20,
@@ -172,12 +172,12 @@ const styles = {
     marginTop: 4,
   },
 };
-
+ 
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
 `;
-
+ 
 const Title = styled.Text`
   font-size: 24px;
   font-weight: bold;
@@ -185,7 +185,7 @@ const Title = styled.Text`
   margin-bottom: 20px;
   text-align: center;
 `;
-
+ 
 const AppointmentCard = styled(ListItem)`
   background-color: ${theme.colors.background};
   border-radius: 8px;
@@ -194,21 +194,21 @@ const AppointmentCard = styled(ListItem)`
   border-width: 1px;
   border-color: ${theme.colors.border};
 `;
-
+ 
 const LoadingText = styled.Text`
   text-align: center;
   color: ${theme.colors.text};
   font-size: 16px;
   margin-top: 20px;
 `;
-
+ 
 const EmptyText = styled.Text`
   text-align: center;
   color: ${theme.colors.text};
   font-size: 16px;
   margin-top: 20px;
 `;
-
+ 
 const StatusBadge = styled.View<StyledProps>`
   background-color: ${(props: StyledProps) => getStatusColor(props.status) + '20'};
   padding: 4px 8px;
@@ -216,11 +216,12 @@ const StatusBadge = styled.View<StyledProps>`
   align-self: flex-start;
   margin-top: 8px;
 `;
-
+ 
 const StatusText = styled.Text<StyledProps>`
   color: ${(props: StyledProps) => getStatusColor(props.status)};
   font-size: 12px;
   font-weight: 500;
 `;
-
-export default PatientDashboardScreen; 
+ 
+export default PatientDashboardScreen;
+ 

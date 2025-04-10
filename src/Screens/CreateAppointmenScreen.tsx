@@ -11,14 +11,15 @@ import Header from '../components/Header';
 import DoctorList from '../components/DoctorList';
 import TimeSlotList from '../components/TimeSlotList';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+ 
 type CreateAppointmentScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CreateAppointment'>;
 };
-
+ 
 interface Appointment {
   id: string;
   patientId: string;
+  patientName: string;
   doctorId: string;
   doctorName: string;
   date: string;
@@ -26,14 +27,14 @@ interface Appointment {
   specialty: string;
   status: 'pending' | 'confirmed' | 'cancelled';
 }
-
+ 
 interface Doctor {
   id: string;
   name: string;
   specialty: string;
   image: string;
 }
-
+ 
 // Lista de médicos disponíveis
 const availableDoctors: Doctor[] = [
   {
@@ -67,7 +68,7 @@ const availableDoctors: Doctor[] = [
     image: 'https://randomuser.me/api/portraits/men/3.jpg',
   },
 ];
-
+ 
 const CreateAppointmentScreen: React.FC = () => {
   const { user } = useAuth();
   const navigation = useNavigation<CreateAppointmentScreenProps['navigation']>();
@@ -76,25 +77,26 @@ const CreateAppointmentScreen: React.FC = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+ 
   const handleCreateAppointment = async () => {
     try {
       setLoading(true);
       setError('');
-
+ 
       if (!date || !selectedTime || !selectedDoctor) {
         setError('Por favor, preencha a data e selecione um médico e horário');
         return;
       }
-
+ 
       // Recupera consultas existentes
       const storedAppointments = await AsyncStorage.getItem('@MedicalApp:appointments');
       const appointments: Appointment[] = storedAppointments ? JSON.parse(storedAppointments) : [];
-
+ 
       // Cria nova consulta
       const newAppointment: Appointment = {
         id: Date.now().toString(),
         patientId: user?.id || '',
+        patientName: user?.name || '',
         doctorId: selectedDoctor.id,
         doctorName: selectedDoctor.name,
         date,
@@ -102,13 +104,13 @@ const CreateAppointmentScreen: React.FC = () => {
         specialty: selectedDoctor.specialty,
         status: 'pending',
       };
-
+ 
       // Adiciona nova consulta à lista
       appointments.push(newAppointment);
-
+ 
       // Salva lista atualizada
       await AsyncStorage.setItem('@MedicalApp:appointments', JSON.stringify(appointments));
-
+ 
       alert('Consulta agendada com sucesso!');
       navigation.goBack();
     } catch (err) {
@@ -117,13 +119,13 @@ const CreateAppointmentScreen: React.FC = () => {
       setLoading(false);
     }
   };
-
+ 
   return (
     <Container>
       <Header />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Title>Agendar Consulta</Title>
-
+ 
         <Input
           placeholder="Data (DD/MM/AAAA)"
           value={date}
@@ -131,22 +133,22 @@ const CreateAppointmentScreen: React.FC = () => {
           containerStyle={styles.input}
           keyboardType="numeric"
         />
-
+ 
         <SectionTitle>Selecione um Horário</SectionTitle>
         <TimeSlotList
           onSelectTime={setSelectedTime}
           selectedTime={selectedTime}
         />
-
+ 
         <SectionTitle>Selecione um Médico</SectionTitle>
         <DoctorList
           doctors={availableDoctors}
           onSelectDoctor={setSelectedDoctor}
           selectedDoctorId={selectedDoctor?.id}
         />
-
+ 
         {error ? <ErrorText>{error}</ErrorText> : null}
-
+ 
         <Button
           title="Agendar"
           onPress={handleCreateAppointment}
@@ -154,7 +156,7 @@ const CreateAppointmentScreen: React.FC = () => {
           containerStyle={styles.button as ViewStyle}
           buttonStyle={styles.buttonStyle}
         />
-
+ 
         <Button
           title="Cancelar"
           onPress={() => navigation.goBack()}
@@ -165,7 +167,7 @@ const CreateAppointmentScreen: React.FC = () => {
     </Container>
   );
 };
-
+ 
 const styles = {
   scrollContent: {
     padding: 20,
@@ -186,12 +188,12 @@ const styles = {
     paddingVertical: 12,
   },
 };
-
+ 
 const Container = styled.View`
   flex: 1;
   background-color: ${theme.colors.background};
 `;
-
+ 
 const Title = styled.Text`
   font-size: 24px;
   font-weight: bold;
@@ -199,7 +201,7 @@ const Title = styled.Text`
   margin-bottom: 20px;
   text-align: center;
 `;
-
+ 
 const SectionTitle = styled.Text`
   font-size: 18px;
   font-weight: bold;
@@ -207,11 +209,11 @@ const SectionTitle = styled.Text`
   margin-bottom: 10px;
   margin-top: 10px;
 `;
-
+ 
 const ErrorText = styled.Text`
   color: ${theme.colors.error};
   text-align: center;
   margin-bottom: 10px;
 `;
-
+ 
 export default CreateAppointmentScreen;
